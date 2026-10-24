@@ -22,7 +22,7 @@
 
 ## 本地开发
 
-需要 Node.js 22（版本见 `.nvmrc`，要求 ≥ 22.23.4）。
+需要 Node.js ≥ 22.23.4（CI 使用的版本见 `.nvmrc`）。
 
 ```bash
 npm install
