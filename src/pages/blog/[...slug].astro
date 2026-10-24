@@ -1,0 +1,162 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatDate, getPosts, postUrl, readingMinutes, tagUrl, type Post } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPosts();
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+interface Props {
+  post: Post;
+  newer?: Post;
+  older?: Post;
+}
+
+const { post, newer, older } = Astro.props;
+const { Content, headings } = await render(post);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article>
+    <header class="post-header">
+      <a class="mono back" href="/blog/">← 返回博客</a>
+      <h1>{post.data.title}</h1>
+      <div class="meta mono dim">
+        <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+        {post.data.updated && <span>更新于 {formatDate(post.data.updated)}</span>}
+        <span>约 {readingMinutes(post.body)} 分钟</span>
+        {post.data.sample && <span class="badge-todo">示例文章</span>}
+      </div>
+      {
+        post.data.tags.length > 0 && (
+          <div class="tags">
+            {post.data.tags.map((tag) => (
+              <a class="tag" href={tagUrl(tag)}>
+                #{tag}
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </header>
+
+    {
+      toc.length > 2 && (
+        <details class="toc card" open>
+          <summary class="mono">目录</summary>
+          <ul>
+            {toc.map((h) => (
+              <li class={`depth-${h.depth}`}>
+                <a href={`#${h.slug}`}>{h.text}</a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )
+    }
+
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+
+  <nav class="post-nav" aria-label="文章导航">
+    {
+      newer ? (
+        <a class="card" href={postUrl(newer)}>
+          <span class="mono dim">← 较新</span>
+          <span>{newer.data.title}</span>
+        </a>
+      ) : (
+        <span />
+      )
+    }
+    {
+      older && (
+        <a class="card older" href={postUrl(older)}>
+          <span class="mono dim">较早 →</span>
+          <span>{older.data.title}</span>
+        </a>
+      )
+    }
+  </nav>
+</BaseLayout>
+
+<style>
+  .post-header {
+    margin-bottom: 28px;
+  }
+  .back {
+    font-size: 0.85rem;
+  }
+  h1 {
+    font-size: clamp(1.6rem, 5vw, 2.1rem);
+    line-height: 1.35;
+    margin: 12px 0 10px;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    font-size: 0.85rem;
+    margin-bottom: 12px;
+  }
+  .toc {
+    margin-bottom: 28px;
+    font-size: 0.925rem;
+  }
+  .toc summary {
+    cursor: pointer;
+    color: var(--accent);
+  }
+  .toc ul {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+  }
+  .toc .depth-3 {
+    padding-left: 16px;
+  }
+  .toc a {
+    color: var(--text-dim);
+  }
+  .toc a:hover {
+    color: var(--text);
+  }
+  .post-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 56px;
+  }
+  .post-nav a {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    color: var(--text);
+    font-size: 0.925rem;
+  }
+  .post-nav a:hover {
+    text-decoration: none;
+    border-color: var(--accent);
+  }
+  .post-nav .older {
+    text-align: right;
+    grid-column: 2;
+  }
+  @media (max-width: 600px) {
+    .post-nav {
+      grid-template-columns: 1fr;
+    }
+    .post-nav .older {
+      grid-column: 1;
+    }
+  }
+</style>
