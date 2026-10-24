@@ -1,0 +1,38 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts, getTagCounts, tagUrl } from '../../lib/posts';
+
+const posts = await getPosts();
+const tags = getTagCounts(posts);
+---
+
+<BaseLayout title="博客" description="技术笔记：ROS 2、C++、嵌入式与 AI 应用">
+  <h1 class="page-title mono"><span class="accent">$</span> ls ./blog</h1>
+  <p class="dim">技术笔记与学习记录，共 {posts.length} 篇。</p>
+  {
+    tags.length > 0 && (
+      <div class="tags tag-bar">
+        {tags.map(([tag, count]) => (
+          <a class="tag" href={tagUrl(tag)}>
+            #{tag} <span class="dim">{count}</span>
+          </a>
+        ))}
+      </div>
+    )
+  }
+  <PostList posts={posts} />
+</BaseLayout>
+
+<style>
+  .page-title {
+    font-size: 1.6rem;
+    margin: 0 0 4px;
+  }
+  .accent {
+    color: var(--accent);
+  }
+  .tag-bar {
+    margin: 12px 0 16px;
+  }
+</style>

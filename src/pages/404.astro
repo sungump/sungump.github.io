@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404">
+  <div class="nf mono">
+    <p class="dim">$ cd {Astro.url.pathname}</p>
+    <p><span class="err">bash: cd: No such file or directory</span></p>
+    <h1>404</h1>
+    <p>页面不存在。<a href="/">返回首页</a> 或 <a href="/blog/">浏览博客</a>。</p>
+  </div>
+</BaseLayout>
+
+<style>
+  .nf {
+    padding: 48px 0;
+  }
+  .err {
+    color: #f87171;
+  }
+  h1 {
+    font-size: 4rem;
+    margin: 16px 0;
+    color: var(--accent);
+  }
+</style>

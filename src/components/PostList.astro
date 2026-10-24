@@ -1,0 +1,83 @@
+---
+import { formatDate, postUrl, tagUrl, type Post } from '../lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+{
+  posts.length === 0 ? (
+    <p class="dim">暂无文章。</p>
+  ) : (
+    <ul class="post-list">
+      {posts.map((post) => (
+        <li class="post-item">
+          <time class="mono dim" datetime={post.data.date.toISOString()}>
+            {formatDate(post.data.date)}
+          </time>
+          <div class="post-main">
+            <a class="post-title" href={postUrl(post)}>
+              {post.data.title}
+            </a>
+            {post.data.sample && <span class="badge-todo">示例</span>}
+            {post.data.draft && <span class="badge-todo">草稿</span>}
+            {post.data.description && <p class="post-desc dim">{post.data.description}</p>}
+            {post.data.tags.length > 0 && (
+              <div class="tags">
+                {post.data.tags.map((tag) => (
+                  <a class="tag" href={tagUrl(tag)}>
+                    #{tag}
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+<style>
+  .post-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .post-item {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 16px;
+    padding: 16px 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .post-item:last-child {
+    border-bottom: 0;
+  }
+  time {
+    font-size: 0.85rem;
+    padding-top: 2px;
+  }
+  .post-title {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-right: 8px;
+  }
+  .post-title:hover {
+    color: var(--accent);
+  }
+  .post-desc {
+    margin: 4px 0 8px;
+    font-size: 0.925rem;
+  }
+  @media (max-width: 600px) {
+    .post-item {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+</style>
